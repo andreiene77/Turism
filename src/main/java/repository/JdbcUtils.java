@@ -1,4 +1,4 @@
-package Repository;
+package repository;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -13,7 +13,7 @@ public class JdbcUtils {
     private Properties jdbcProps;
     private Connection instance = null;
 
-    public JdbcUtils(Properties props) {
+    JdbcUtils(Properties props) {
         jdbcProps = props;
     }
 
@@ -44,7 +44,7 @@ public class JdbcUtils {
         return con;
     }
 
-    public Connection getConnection() {
+    Connection getConnection() {
         logger.traceEntry();
         try {
             if (instance == null || instance.isClosed())

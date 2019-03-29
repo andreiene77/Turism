@@ -1,12 +1,15 @@
-package Repository;
+package repository;
 
-import Domain.Agentie;
-import Domain.Excursie;
-import Domain.Rezervare;
+import model.Agentie;
+import model.Excursie;
+import model.Rezervare;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -24,6 +27,7 @@ public class RepoRezervareJDBC implements IRepository<String, Rezervare> {
     public int size() {
         logger.traceEntry();
         Connection con = dbUtils.getConnection();
+
         try (PreparedStatement preStmt = con.prepareStatement("select count(*) as [SIZE] from Rezervari")) {
             try (ResultSet result = preStmt.executeQuery()) {
                 if (result.next()) {
@@ -42,6 +46,7 @@ public class RepoRezervareJDBC implements IRepository<String, Rezervare> {
     public void save(Rezervare entity) {
         logger.traceEntry("saving rezervare {} ", entity);
         Connection con = dbUtils.getConnection();
+
         try (PreparedStatement preStmt = con.prepareStatement("insert into Rezervari values (?,?,?,?,?,?)")) {
             preStmt.setString(1, entity.getId());
             preStmt.setString(2, entity.getAgentie().getId());
@@ -49,7 +54,7 @@ public class RepoRezervareJDBC implements IRepository<String, Rezervare> {
             preStmt.setString(4, entity.getNumeClient());
             preStmt.setString(5, entity.getTelefon());
             preStmt.setInt(6, entity.getNrBilete());
-            int result = preStmt.executeUpdate();
+            preStmt.executeUpdate();
         } catch (SQLException ex) {
             logger.error(ex);
             System.out.println("Error DB " + ex);
@@ -64,7 +69,7 @@ public class RepoRezervareJDBC implements IRepository<String, Rezervare> {
         Connection con = dbUtils.getConnection();
         try (PreparedStatement preStmt = con.prepareStatement("delete from Rezervari where id=?")) {
             preStmt.setString(1, string);
-            int result = preStmt.executeUpdate();
+            preStmt.executeUpdate();
         } catch (SQLException ex) {
             logger.error(ex);
             System.out.println("Error DB " + ex);
@@ -74,7 +79,7 @@ public class RepoRezervareJDBC implements IRepository<String, Rezervare> {
 
     @Override
     public void update(String string, Rezervare entity) {
-        //To do
+        //TODO: update Rezervare
     }
 
     @Override
@@ -86,31 +91,7 @@ public class RepoRezervareJDBC implements IRepository<String, Rezervare> {
             preStmt.setString(1, string);
             try (ResultSet result = preStmt.executeQuery()) {
                 if (result.next()) {
-                    String id = result.getString("id");
-                    String ida = result.getString("ida");
-                    String ide = result.getString("ide");
-                    String numeClient = result.getString("numeClient");
-                    String telefon = result.getString("telefon");
-                    Integer nrBilete = result.getInt("nrBilete");
-
-                    PreparedStatement preStmt1 = con.prepareStatement("select * from Agentii where id=?");
-                    preStmt1.setString(1, ida);
-                    ResultSet ag_result = preStmt1.executeQuery();
-                    String username = ag_result.getString("usrname");
-                    String pass = ag_result.getString("pswd");
-                    Agentie agentie = new Agentie(ida, username, pass);
-
-                    PreparedStatement preStmt2 = con.prepareStatement("select * from Excursii where id=?");
-                    preStmt2.setString(1, ide);
-                    ResultSet ex_result = preStmt2.executeQuery();
-                    String obiectiv = ex_result.getString("obiectiv");
-                    String firmaTransport = ex_result.getString("firmaTransport");
-                    Time oraPlecarii = java.sql.Time.valueOf(ex_result.getString("oraPlecarii"));
-                    Double pretul = ex_result.getDouble("pretul");
-                    Integer locuriDisponibile = ex_result.getInt("locuriDisponibile");
-                    Excursie excursie = new Excursie(ide, obiectiv, firmaTransport, oraPlecarii, pretul, locuriDisponibile);
-
-                    Rezervare rezervare = new Rezervare(id, agentie, excursie, numeClient, telefon, nrBilete);
+                    Rezervare rezervare = rowToRezervare(con, result);
                     logger.traceExit(rezervare);
                     return rezervare;
                 }
@@ -132,31 +113,7 @@ public class RepoRezervareJDBC implements IRepository<String, Rezervare> {
         try (PreparedStatement preStmt = con.prepareStatement("select * from Rezervari")) {
             try (ResultSet result = preStmt.executeQuery()) {
                 while (result.next()) {
-                    String id = result.getString("id");
-                    String ida = result.getString("ida");
-                    String ide = result.getString("ide");
-                    String numeClient = result.getString("numeClient");
-                    String telefon = result.getString("telefon");
-                    Integer nrBilete = result.getInt("nrBilete");
-
-                    PreparedStatement preStmt1 = con.prepareStatement("select * from Agentii where id=?");
-                    preStmt1.setString(1, ida);
-                    ResultSet ag_result = preStmt1.executeQuery();
-                    String username = ag_result.getString("usrname");
-                    String pass = ag_result.getString("pswd");
-                    Agentie agentie = new Agentie(ida, username, pass);
-
-                    PreparedStatement preStmt2 = con.prepareStatement("select * from Excursii where id=?");
-                    preStmt2.setString(1, ide);
-                    ResultSet ex_result = preStmt2.executeQuery();
-                    String obiectiv = ex_result.getString("obiectiv");
-                    String firmaTransport = ex_result.getString("firmaTransport");
-                    Time oraPlecarii = java.sql.Time.valueOf(ex_result.getString("oraPlecarii"));
-                    Double pretul = ex_result.getDouble("pretul");
-                    Integer locuriDisponibile = ex_result.getInt("locuriDisponibile");
-                    Excursie excursie = new Excursie(ide, obiectiv, firmaTransport, oraPlecarii, pretul, locuriDisponibile);
-
-                    Rezervare rezervare = new Rezervare(id, agentie, excursie, numeClient, telefon, nrBilete);
+                    rezervari.add(rowToRezervare(con, result));
                 }
             }
         } catch (SQLException e) {
@@ -165,5 +122,26 @@ public class RepoRezervareJDBC implements IRepository<String, Rezervare> {
         }
         logger.traceExit(rezervari);
         return rezervari;
+    }
+
+    private Rezervare rowToRezervare(Connection con, ResultSet result) throws SQLException {
+        String id = result.getString("id");
+        String ida = result.getString("username_ag");
+        String ide = result.getString("ide");
+        String numeClient = result.getString("numeClient");
+        String telefon = result.getString("telefon");
+        Integer nrBilete = result.getInt("nrBilete");
+
+        PreparedStatement preStmt1 = con.prepareStatement("select * from Agentii where usrname=?");
+        preStmt1.setString(1, ida);
+        ResultSet ag_result = preStmt1.executeQuery();
+        Agentie agentie = new Agentie(ag_result);
+
+        PreparedStatement preStmt2 = con.prepareStatement("select * from Excursii where id=?");
+        preStmt2.setString(1, ide);
+        ResultSet ex_result = preStmt2.executeQuery();
+        Excursie excursie = new Excursie(ex_result);
+
+        return new Rezervare(id, agentie, excursie, numeClient, telefon, nrBilete);
     }
 }

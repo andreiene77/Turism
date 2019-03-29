@@ -1,5 +1,7 @@
-package Domain;
+package model;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Time;
 
 public class Excursie implements IHasID<String> {
@@ -17,6 +19,16 @@ public class Excursie implements IHasID<String> {
         this.oraPlecarii = oraPlecarii;
         this.pretul = pretul;
         this.locuriDisponibile = locuriDisponibile;
+    }
+
+    public Excursie(ResultSet result) throws SQLException {
+        this.id = result.getString("id");
+        this.obiectiv = result.getString("obiectiv");
+        this.firmaTransport = result.getString("firmaTransport");
+        this.oraPlecarii = Time.valueOf(result.getString("oraPlecarii"));
+        this.pretul = result.getDouble("pretul");
+        this.locuriDisponibile = result.getInt("locuriDisponibile");
+
     }
 
     @Override

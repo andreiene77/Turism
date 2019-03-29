@@ -1,4 +1,4 @@
-package Domain;
+package model;
 
 public class Rezervare implements IHasID<String> {
     private String id;

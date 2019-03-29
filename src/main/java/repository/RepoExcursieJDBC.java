@@ -1,6 +1,6 @@
-package Repository;
+package repository;
 
-import Domain.Agentie;
+import model.Excursie;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,12 +12,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
-public class RepoAgentieJDBC implements IRepository<String, Agentie> {
+public class RepoExcursieJDBC implements IRepository<String, Excursie> {
     private static final Logger logger = LogManager.getLogger();
     private JdbcUtils dbUtils;
 
-    public RepoAgentieJDBC(Properties props) {
-        logger.info("Initializing AgentieRepository with properties: {} ", props);
+    public RepoExcursieJDBC(Properties props) {
+        logger.info("Initializing ExcursieRepository with properties: {} ", props);
         dbUtils = new JdbcUtils(props);
     }
 
@@ -25,7 +25,8 @@ public class RepoAgentieJDBC implements IRepository<String, Agentie> {
     public int size() {
         logger.traceEntry();
         Connection con = dbUtils.getConnection();
-        try (PreparedStatement preStmt = con.prepareStatement("select count(*) as [SIZE] from Agentii")) {
+
+        try (PreparedStatement preStmt = con.prepareStatement("select count(*) as [SIZE] from Excursii")) {
             try (ResultSet result = preStmt.executeQuery()) {
                 if (result.next()) {
                     logger.traceExit(result.getInt("SIZE"));
@@ -40,14 +41,18 @@ public class RepoAgentieJDBC implements IRepository<String, Agentie> {
     }
 
     @Override
-    public void save(Agentie entity) {
-        logger.traceEntry("saving agentie {} ", entity);
+    public void save(Excursie entity) {
+        logger.traceEntry("saving excursie {} ", entity);
         Connection con = dbUtils.getConnection();
-        try (PreparedStatement preStmt = con.prepareStatement("insert into Agentii values (?,?,?)")) {
+
+        try (PreparedStatement preStmt = con.prepareStatement("insert into Excursii values (?,?,?,?,?,?)")) {
             preStmt.setString(1, entity.getId());
-            preStmt.setString(2, entity.getUsername());
-            preStmt.setString(3, entity.getPassword());
-            int result = preStmt.executeUpdate();
+            preStmt.setString(2, entity.getObiectiv());
+            preStmt.setString(3, entity.getFirmaTransport());
+            preStmt.setString(4, entity.getOraPlecarii().toString());
+            preStmt.setDouble(5, entity.getPretul());
+            preStmt.setInt(6, entity.getLocuriDisponibile());
+            preStmt.executeUpdate();
         } catch (SQLException ex) {
             logger.error(ex);
             System.out.println("Error DB " + ex);
@@ -58,11 +63,11 @@ public class RepoAgentieJDBC implements IRepository<String, Agentie> {
 
     @Override
     public void delete(String string) {
-        logger.traceEntry("deleting agentie with {}", string);
+        logger.traceEntry("deleting excursie with {}", string);
         Connection con = dbUtils.getConnection();
-        try (PreparedStatement preStmt = con.prepareStatement("delete from Agentii where id=?")) {
+        try (PreparedStatement preStmt = con.prepareStatement("delete from Excursii where id=?")) {
             preStmt.setString(1, string);
-            int result = preStmt.executeUpdate();
+            preStmt.executeUpdate();
         } catch (SQLException ex) {
             logger.error(ex);
             System.out.println("Error DB " + ex);
@@ -71,58 +76,49 @@ public class RepoAgentieJDBC implements IRepository<String, Agentie> {
     }
 
     @Override
-    public void update(String string, Agentie entity) {
-        //To do
+    public void update(String string, Excursie entity) {
+        //TODO: update Excursie
     }
 
     @Override
-    public Agentie findOne(String string) {
-        logger.traceEntry("finding agentie with id {} ", string);
+    public Excursie findOne(String string) {
+        logger.traceEntry("finding excursie with id {} ", string);
         Connection con = dbUtils.getConnection();
 
-        try (PreparedStatement preStmt = con.prepareStatement("select * from Agentii where id=?")) {
+        try (PreparedStatement preStmt = con.prepareStatement("select * from Excursii where id=?")) {
             preStmt.setString(1, string);
             try (ResultSet result = preStmt.executeQuery()) {
                 if (result.next()) {
-                    String id = result.getString("id");
-                    String username = result.getString("usrname");
-                    String pass = result.getString("pswd");
-                    Agentie agentie = new Agentie(id, username, pass);
-                    logger.traceExit(agentie);
-                    return agentie;
+                    Excursie excursie = new Excursie(result);
+                    logger.traceExit(excursie);
+                    return excursie;
                 }
             }
         } catch (SQLException ex) {
             logger.error(ex);
             System.out.println("Error DB " + ex);
         }
-        logger.traceExit("No agentie found with id {}", string);
+        logger.traceExit("No excursie found with id {}", string);
 
         return null;
     }
 
     @Override
-    public Iterable<Agentie> findAll() {
+    public Iterable<Excursie> findAll() {
         logger.traceEntry();
         Connection con = dbUtils.getConnection();
-        List<Agentie> agentii = new ArrayList<>();
-        try (PreparedStatement preStmt = con.prepareStatement("select * from Agentii")) {
+        List<Excursie> excursii = new ArrayList<>();
+        try (PreparedStatement preStmt = con.prepareStatement("select * from Excursii")) {
             try (ResultSet result = preStmt.executeQuery()) {
                 while (result.next()) {
-                    String id = result.getString("id");
-                    String username = result.getString("usrname");
-                    String pass = result.getString("pswd");
-                    Agentie agentie = new Agentie(id, username, pass);
-                    agentii.add(agentie);
+                    excursii.add(new Excursie(result));
                 }
             }
         } catch (SQLException e) {
             logger.error(e);
             System.out.println("Error DB " + e);
         }
-        logger.traceExit(agentii);
-        return agentii;
+        logger.traceExit(excursii);
+        return excursii;
     }
-
-
 }

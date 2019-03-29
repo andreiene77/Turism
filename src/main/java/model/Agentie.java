@@ -1,22 +1,24 @@
-package Domain;
+package model;
+
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class Agentie implements IHasID<String> {
-    private String id;
     private String username;
     private String password;
 
-    public Agentie(String id, String username, String password) {
-        this.id = id;
+    public Agentie(String username, String password) {
         this.username = username;
         this.password = password;
     }
 
-    @Override
-    public String getId() {
-        return id;
+    public Agentie(ResultSet result) throws SQLException {
+        this.username = result.getString("usrname");
+        this.password = result.getString("pswd");
     }
 
-    public String getUsername() {
+    @Override
+    public String getId() {
         return username;
     }
 
@@ -27,8 +29,7 @@ public class Agentie implements IHasID<String> {
     @Override
     public String toString() {
         return "Agentie{" +
-                "id='" + id + '\'' +
-                ", username='" + username + '\'' +
+                "username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 '}';
     }

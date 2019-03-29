@@ -1,4 +1,4 @@
-package Repository;
+package repository;
 
 public interface IRepository<ID, T> {
     int size();
