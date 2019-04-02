@@ -58,7 +58,6 @@ public class RepoExcursieJDBC implements IRepository<String, Excursie> {
             System.out.println("Error DB " + ex);
         }
         logger.traceExit();
-
     }
 
     @Override
@@ -77,7 +76,22 @@ public class RepoExcursieJDBC implements IRepository<String, Excursie> {
 
     @Override
     public void update(String string, Excursie entity) {
-        //TODO: update Excursie
+        logger.traceEntry("updateing excursie {} ", entity);
+        Connection con = dbUtils.getConnection();
+
+        try (PreparedStatement preStmt = con.prepareStatement("update Excursii set obiectiv=?, firmaTransport=?, oraPlecarii=?, pretul=?, locuriDisponibile=? where id=?")) {
+            preStmt.setString(1, entity.getObiectiv());
+            preStmt.setString(2, entity.getFirmaTransport());
+            preStmt.setString(3, entity.getOraPlecarii().toString());
+            preStmt.setDouble(4, entity.getPretul());
+            preStmt.setInt(5, entity.getLocuriDisponibile());
+            preStmt.setString(6, string);
+            preStmt.executeUpdate();
+        } catch (SQLException ex) {
+            logger.error(ex);
+            System.out.println("Error DB " + ex);
+        }
+        logger.traceExit();
     }
 
     @Override

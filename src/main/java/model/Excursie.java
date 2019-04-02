@@ -55,4 +55,8 @@ public class Excursie implements IHasID<String> {
     public Integer getLocuriDisponibile() {
         return locuriDisponibile;
     }
+
+    public void setLocuriDisponibile(Integer locuriDisponibile) {
+        this.locuriDisponibile = locuriDisponibile;
+    }
 }

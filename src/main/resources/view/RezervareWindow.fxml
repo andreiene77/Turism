@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="200.0" prefWidth="200.0"
+            xmlns="http://javafx.com/javafx/10.0.1" fx:controller="controller.RezervareWindowController">
+    <children>
+        <TextField fx:id="numeTextField" prefHeight="40.0" prefWidth="200.0" promptText="Numele clientului"
+                   style="-fx-border-style: solid; -fx-border-color: #dfdfdf; -fx-border-width: 1px; -fx-background-color: #fafafa;"/>
+        <TextField fx:id="telefonTextField" layoutY="40.0" prefHeight="40.0" prefWidth="200.0" promptText="Telefon"
+                   style="-fx-border-style: solid; -fx-border-color: #dfdfdf; -fx-border-width: 1px; -fx-background-color: #fafafa;"/>
+        <TextField fx:id="nrBileteTextField" layoutY="80.0" prefHeight="40.0" prefWidth="200.0" promptText="Nr. bilete"
+                   style="-fx-border-style: solid; -fx-border-color: #dfdfdf; -fx-border-width: 1px; -fx-background-color: #fafafa;"/>
+        <Button layoutY="120.0" mnemonicParsing="false" onAction="#handleRezervare" prefHeight="40.0" prefWidth="200.0"
+                style="-fx-padding: 10;" text="Rezervare">
+            <font>
+                <Font size="14.0"/>
+            </font>
+        </Button>
+        <Button cancelButton="true" layoutY="160.0" mnemonicParsing="false" onAction="#handleAnulare" prefHeight="40.0"
+                prefWidth="200.0" style="-fx-padding: 10;" text="Anulare"/>
+    </children>
+</AnchorPane>

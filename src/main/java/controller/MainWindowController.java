@@ -6,6 +6,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
@@ -26,6 +27,8 @@ public class MainWindowController {
 
     private ObservableList<Excursie> excursii = FXCollections.observableArrayList();
 
+    private Agentie userCurent;
+
     @FXML
     private TableView<Excursie> excursiiTableView;
     @FXML
@@ -39,8 +42,16 @@ public class MainWindowController {
     @FXML
     private TableColumn<Excursie, Integer> locuriColumn;
 
-    public void setUser(Agentie user) {
-        excursiiManagementService.setUserCurent(user);
+    public TableView<Excursie> getExcursiiTableView() {
+        return excursiiTableView;
+    }
+
+    public Agentie getUserCurent() {
+        return userCurent;
+    }
+
+    public void setUserCurent(Agentie userCurent) {
+        this.userCurent = userCurent;
     }
 
     @FXML
@@ -53,12 +64,25 @@ public class MainWindowController {
 
         excursii.setAll(list);
 
-
         obiectivColumn.setCellValueFactory(new PropertyValueFactory<>("obiectiv"));
         firmaColumn.setCellValueFactory(new PropertyValueFactory<>("firmaTransport"));
         oraPlecareColumn.setCellValueFactory(new PropertyValueFactory<>("oraPlecarii"));
         pretColumn.setCellValueFactory(new PropertyValueFactory<>("pretul"));
         locuriColumn.setCellValueFactory(new PropertyValueFactory<>("locuriDisponibile"));
+
+        excursiiTableView.setRowFactory(tv -> new TableRow<Excursie>() {
+            @Override
+            public void updateItem(Excursie item, boolean empty) {
+                super.updateItem(item, empty);
+                if (item == null) {
+                    setStyle("");
+                } else if (item.getLocuriDisponibile() == 0) {
+                    setStyle("-fx-background-color: tomato;");
+                } else {
+                    setStyle("");
+                }
+            }
+        });
 
         excursiiTableView.setItems(excursii);
     }
@@ -73,5 +97,47 @@ public class MainWindowController {
         primaryStage.setScene(new Scene(loader.load()));
         ((Stage) excursiiTableView.getScene().getWindow()).close();
         primaryStage.show();
+    }
+
+    @FXML
+    public void handleSearch() throws IOException {
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource("/view/SearchWindow.fxml"));
+
+        Stage primaryStage = new Stage();
+        primaryStage.setTitle("Cautare");
+        primaryStage.setScene(new Scene(loader.load()));
+
+        Stage currentStage = (Stage) excursiiTableView.getScene().getWindow();
+
+        primaryStage.setX(currentStage.getX() + currentStage.getWidth());
+        primaryStage.setY(currentStage.getY());
+
+        primaryStage.show();
+    }
+
+    @FXML
+    public void handleRezervare() throws IOException {
+        FXMLLoader loader = new FXMLLoader();
+        loader.setLocation(getClass().getResource("/view/RezervareWindow.fxml"));
+
+        Stage primaryStage = new Stage();
+        primaryStage.setTitle("Rezervare");
+        primaryStage.setScene(new Scene(loader.load()));
+        loader.<RezervareWindowController>getController().setMainController(this);
+
+        Stage currentStage = (Stage) excursiiTableView.getScene().getWindow();
+
+        primaryStage.setX(currentStage.getX());
+        primaryStage.setY(currentStage.getY() + currentStage.getHeight());
+
+        primaryStage.show();
+    }
+
+    public void update() {
+        List<Excursie> list = StreamSupport.stream(excursiiManagementService.getAllExcursii().spliterator(), false)
+                .collect(Collectors.toList());
+        excursii.setAll(list);
+        excursiiTableView.setItems(excursii);
     }
 }

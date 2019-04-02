@@ -44,8 +44,14 @@ public class LoginController {
             Stage primaryStage = new Stage();
             primaryStage.setTitle("Main Window");
             primaryStage.setScene(new Scene(loader.load()));
-            loader.<MainWindowController>getController().setUser(user);
-            ((Stage) usernameTextField.getScene().getWindow()).close();
+            loader.<MainWindowController>getController().setUserCurent(user);
+
+            Stage currentStage = (Stage) usernameTextField.getScene().getWindow();
+
+            primaryStage.setX(currentStage.getX() - currentStage.getWidth() / 2);
+            primaryStage.setY(currentStage.getY() - currentStage.getHeight() / 2);
+
+            currentStage.close();
             primaryStage.show();
         }
     }

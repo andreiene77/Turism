@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+<AnchorPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="400.0" prefWidth="450.0"
+            xmlns="http://javafx.com/javafx/10.0.1" fx:controller="controller.SearchWindowController">
+    <children>
+        <Button defaultButton="true" layoutX="3.0" layoutY="360.0" mnemonicParsing="false" onAction="#handleSearch"
+                prefHeight="40.0" prefWidth="225.0" style="-fx-padding: 10;" text="Cautare">
+            <font>
+                <Font size="14.0"/>
+            </font>
+        </Button>
+        <Button cancelButton="true" layoutX="228.0" layoutY="360.0" mnemonicParsing="false" onAction="#handleInapoi"
+                prefHeight="40.0" prefWidth="225.0" style="-fx-padding: 10;" text="Inapoi"/>
+        <TextField fx:id="obiectivTextField" layoutX="3.0" layoutY="320.0" prefHeight="40.0" prefWidth="200.0"
+                   promptText="Numele obiectivului"
+                   style="-fx-border-style: solid; -fx-border-color: #dfdfdf; -fx-border-width: 1px; -fx-background-color: #fafafa;"/>
+        <TextField fx:id="oraMinTextField" layoutX="203.0" layoutY="320.0" prefHeight="40.0" prefWidth="125.0"
+                   promptText="Ora minima"
+                   style="-fx-border-style: solid; -fx-border-color: #dfdfdf; -fx-border-width: 1px; -fx-background-color: #fafafa;"/>
+        <TextField fx:id="oraMaxTextField" layoutX="328.0" layoutY="320.0" prefHeight="40.0" prefWidth="125.0"
+                   promptText="Ora maxima"
+                   style="-fx-border-style: solid; -fx-border-color: #dfdfdf; -fx-border-width: 1px; -fx-background-color: #fafafa;"/>
+        <TableView fx:id="excursiiTableView" prefHeight="320.0" prefWidth="455.0">
+            <columns>
+                <TableColumn fx:id="obiectivColumn" prefWidth="150.0" text="Obiectiv"/>
+                <TableColumn fx:id="firmaColumn" prefWidth="100.0" text="Firma"/>
+                <TableColumn fx:id="oraPlecareColumn" maxWidth="75.0" prefWidth="75.0" text="Ora plecarii"/>
+                <TableColumn fx:id="pretColumn" prefWidth="50.0" text="Pret"/>
+                <TableColumn fx:id="locuriColumn" prefWidth="75.0" text="Locuri"/>
+            </columns>
+        </TableView>
+    </children>
+</AnchorPane>

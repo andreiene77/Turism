@@ -26,8 +26,13 @@
         <constructor-arg ref="repo_ag"/>
     </bean>
 
-    <bean id="excursii_service" class="service.ExcursiiManagementService" scope="prototype">
+    <bean id="excursii_service" class="service.ExcursiiManagementService">
         <constructor-arg ref="repo_ex"/>
+    </bean>
+
+    <bean id="rezervare_service" class="service.RezervareManagementService">
+        <constructor-arg ref="repo_ex"/>
+        <constructor-arg ref="repo_rez"/>
     </bean>
 
     <!--<bean id="login_controller" class="controller.LoginController">-->

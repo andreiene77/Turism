@@ -1,6 +1,5 @@
 package service;
 
-import model.Agentie;
 import model.Excursie;
 import repository.IRepository;
 
@@ -12,31 +11,18 @@ import java.util.stream.StreamSupport;
 
 public class ExcursiiManagementService {
     private IRepository<String, Excursie> repoExcursie;
-    private Agentie userCurent;
 
     public ExcursiiManagementService(IRepository<String, Excursie> repoExcursie) {
         this.repoExcursie = repoExcursie;
     }
 
-    public Iterable<Excursie> getListaExcursii() {
-        return repoExcursie.findAll();
-    }
-
     public Iterable<Excursie> searchExcursii(String obiectiv, Time minTime, Time maxTime) {
         Stream<Excursie> stream_excursii = StreamSupport.stream(repoExcursie.findAll().spliterator(), false);
         Predicate<Excursie> bySearch = ex ->
-                ex.getObiectiv().equals(obiectiv) &&
+                ex.getObiectiv().contains(obiectiv) &&
                         ex.getOraPlecarii().before(maxTime) &&
                         ex.getOraPlecarii().after(minTime);
         return stream_excursii.filter(bySearch).collect(Collectors.toList());
-    }
-
-    public Agentie getUserCurent() {
-        return userCurent;
-    }
-
-    public void setUserCurent(Agentie userCurent) {
-        this.userCurent = userCurent;
     }
 
     public Iterable<Excursie> getAllExcursii() {
