@@ -1,117 +1,77 @@
 package repository;
 
+import Utils.HibernateUtil;
 import model.Excursie;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.hibernate.Session;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
+import javax.persistence.criteria.CriteriaQuery;
 import java.util.List;
-import java.util.Properties;
 
 public class RepoExcursieJDBC implements IRepository<String, Excursie> {
     private static final Logger logger = LogManager.getLogger();
-    private JdbcUtils dbUtils;
-
-    public RepoExcursieJDBC(Properties props) {
-        logger.info("Initializing ExcursieRepository with properties: {} ", props);
-        dbUtils = new JdbcUtils(props);
-    }
 
     @Override
     public int size() {
         logger.traceEntry();
-        Connection con = dbUtils.getConnection();
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        session.beginTransaction();
+        CriteriaQuery<Excursie> criteria = session.getCriteriaBuilder().createQuery(Excursie.class);
+        criteria.from(Excursie.class);
+        int size = session.createQuery(criteria).getResultList().size();
+        session.getTransaction().commit();
+        session.close();
 
-        try (PreparedStatement preStmt = con.prepareStatement("select count(*) as [SIZE] from Excursii")) {
-            try (ResultSet result = preStmt.executeQuery()) {
-                if (result.next()) {
-                    logger.traceExit(result.getInt("SIZE"));
-                    return result.getInt("SIZE");
-                }
-            }
-        } catch (SQLException ex) {
-            logger.error(ex);
-            System.out.println("Error DB " + ex);
-        }
-        return 0;
+        logger.traceExit();
+        return size;
     }
 
     @Override
     public void save(Excursie entity) {
         logger.traceEntry("saving excursie {} ", entity);
-        Connection con = dbUtils.getConnection();
-
-        try (PreparedStatement preStmt = con.prepareStatement("insert into Excursii values (?,?,?,?,?,?)")) {
-            preStmt.setString(1, entity.getId());
-            preStmt.setString(2, entity.getObiectiv());
-            preStmt.setString(3, entity.getFirmaTransport());
-            preStmt.setString(4, entity.getOraPlecarii().toString());
-            preStmt.setDouble(5, entity.getPretul());
-            preStmt.setInt(6, entity.getLocuriDisponibile());
-            preStmt.executeUpdate();
-        } catch (SQLException ex) {
-            logger.error(ex);
-            System.out.println("Error DB " + ex);
-        }
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        session.beginTransaction();
+        session.save(entity);
+        session.getTransaction().commit();
+        session.close();
         logger.traceExit();
     }
 
     @Override
     public void delete(String string) {
         logger.traceEntry("deleting excursie with {}", string);
-        Connection con = dbUtils.getConnection();
-        try (PreparedStatement preStmt = con.prepareStatement("delete from Excursii where id=?")) {
-            preStmt.setString(1, string);
-            preStmt.executeUpdate();
-        } catch (SQLException ex) {
-            logger.error(ex);
-            System.out.println("Error DB " + ex);
-        }
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        session.beginTransaction();
+        Excursie entity = findOne(string);
+        session.delete(entity);
+        session.getTransaction().commit();
+        session.close();
         logger.traceExit();
     }
 
     @Override
     public void update(String string, Excursie entity) {
-        logger.traceEntry("updateing excursie {} ", entity);
-        Connection con = dbUtils.getConnection();
-
-        try (PreparedStatement preStmt = con.prepareStatement("update Excursii set obiectiv=?, firmaTransport=?, oraPlecarii=?, pretul=?, locuriDisponibile=? where id=?")) {
-            preStmt.setString(1, entity.getObiectiv());
-            preStmt.setString(2, entity.getFirmaTransport());
-            preStmt.setString(3, entity.getOraPlecarii().toString());
-            preStmt.setDouble(4, entity.getPretul());
-            preStmt.setInt(5, entity.getLocuriDisponibile());
-            preStmt.setString(6, string);
-            preStmt.executeUpdate();
-        } catch (SQLException ex) {
-            logger.error(ex);
-            System.out.println("Error DB " + ex);
-        }
+        logger.traceEntry("updating excursie {} ", entity);
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        session.beginTransaction();
+        if (entity.getId().equals(string))
+            session.update(entity);
+        session.getTransaction().commit();
+        session.close();
         logger.traceExit();
     }
 
     @Override
     public Excursie findOne(String string) {
         logger.traceEntry("finding excursie with id {} ", string);
-        Connection con = dbUtils.getConnection();
-
-        try (PreparedStatement preStmt = con.prepareStatement("select * from Excursii where id=?")) {
-            preStmt.setString(1, string);
-            try (ResultSet result = preStmt.executeQuery()) {
-                if (result.next()) {
-                    Excursie excursie = new Excursie(result);
-                    logger.traceExit(excursie);
-                    return excursie;
-                }
-            }
-        } catch (SQLException ex) {
-            logger.error(ex);
-            System.out.println("Error DB " + ex);
-        }
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        session.beginTransaction();
+        Excursie excursie = session.get(Excursie.class, string);
+        session.getTransaction().commit();
+        session.close();
+        if (excursie != null)
+            return excursie;
         logger.traceExit("No excursie found with id {}", string);
 
         return null;
@@ -120,18 +80,14 @@ public class RepoExcursieJDBC implements IRepository<String, Excursie> {
     @Override
     public Iterable<Excursie> findAll() {
         logger.traceEntry();
-        Connection con = dbUtils.getConnection();
-        List<Excursie> excursii = new ArrayList<>();
-        try (PreparedStatement preStmt = con.prepareStatement("select * from Excursii")) {
-            try (ResultSet result = preStmt.executeQuery()) {
-                while (result.next()) {
-                    excursii.add(new Excursie(result));
-                }
-            }
-        } catch (SQLException e) {
-            logger.error(e);
-            System.out.println("Error DB " + e);
-        }
+        Session session = HibernateUtil.getSessionFactory().openSession();
+        session.beginTransaction();
+        CriteriaQuery<Excursie> criteria = session.getCriteriaBuilder().createQuery(Excursie.class);
+        criteria.from(Excursie.class);
+        List<Excursie> excursii = session.createQuery(criteria).getResultList();
+        session.getTransaction().commit();
+        session.close();
+
         logger.traceExit(excursii);
         return excursii;
     }

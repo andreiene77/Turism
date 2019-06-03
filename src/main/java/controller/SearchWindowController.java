@@ -1,26 +1,22 @@
 package controller;
 
+import client.Client;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import model.Excursie;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
-import service.ExcursiiManagementService;
 
-import java.sql.Time;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 public class SearchWindowController {
-    private ExcursiiManagementService excursiiManagementService;
-
+    private Client client;
     private ObservableList<Excursie> excursii = FXCollections.observableArrayList();
 
     @FXML
@@ -30,7 +26,7 @@ public class SearchWindowController {
     @FXML
     private TableColumn<Excursie, String> firmaColumn;
     @FXML
-    private TableColumn<Excursie, Time> oraPlecareColumn;
+    private TableColumn<Excursie, LocalTime> oraPlecareColumn;
     @FXML
     private TableColumn<Excursie, Double> pretColumn;
     @FXML
@@ -43,42 +39,38 @@ public class SearchWindowController {
     @FXML
     private TextField oraMaxTextField;
 
-    @FXML
-    public void initialize() {
-        ApplicationContext context = new ClassPathXmlApplicationContext("TurismApp.xml");
-        excursiiManagementService = context.getBean(ExcursiiManagementService.class);
-
-        List<Excursie> list = StreamSupport.stream(excursiiManagementService.getAllExcursii().spliterator(), false)
-                .collect(Collectors.toList());
-
-        excursii.setAll(list);
-
-        obiectivColumn.setCellValueFactory(new PropertyValueFactory<>("obiectiv"));
-        firmaColumn.setCellValueFactory(new PropertyValueFactory<>("firmaTransport"));
-        oraPlecareColumn.setCellValueFactory(new PropertyValueFactory<>("oraPlecarii"));
-        pretColumn.setCellValueFactory(new PropertyValueFactory<>("pretul"));
-        locuriColumn.setCellValueFactory(new PropertyValueFactory<>("locuriDisponibile"));
-
+    void setExcursii() {
+        MainWindowController.updateTableView(client, excursii, excursiiTableView);
+        MainWindowController.setColumns(obiectivColumn, firmaColumn, oraPlecareColumn, pretColumn, locuriColumn);
         excursiiTableView.setItems(excursii);
+    }
+
+    void setClient(Client client) {
+        this.client = client;
     }
 
     @FXML
     public void handleSearch() {
+        DateTimeFormatter parser = DateTimeFormatter.ofPattern("HH:mm");
         String obiectiv = obiectivTextField.getText();
-        Time oraMin, oraMax;
+        LocalTime oraMin, oraMax;
         try {
-            oraMin = Time.valueOf(oraMinTextField.getText());
-        } catch (IllegalArgumentException e) {
-            oraMin = Time.valueOf("00:00:00");
+            oraMin = LocalTime.parse(oraMinTextField.getText(), parser);
+        } catch (IllegalArgumentException | DateTimeParseException e) {
+            oraMin = LocalTime.MIN;
         }
         try {
-            oraMax = Time.valueOf(oraMaxTextField.getText());
-        } catch (IllegalArgumentException e) {
-            oraMax = Time.valueOf("23:59:59");
+            oraMax = LocalTime.parse(oraMaxTextField.getText(), parser);
+        } catch (IllegalArgumentException | DateTimeParseException e) {
+            oraMax = LocalTime.MAX;
         }
 
-        List<Excursie> list = StreamSupport.stream(excursiiManagementService.searchExcursii(obiectiv, oraMin, oraMax).spliterator(), false)
-                .collect(Collectors.toList());
+        client.requestSearchList(obiectiv, oraMin.format(parser), oraMax.format(parser));
+        while (!client.isListSearchModified()) {
+            if (client.isError())
+                return;
+        }
+        List<Excursie> list = client.getListSearchExcursii();
         excursii.setAll(list);
     }
 

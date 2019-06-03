@@ -15,7 +15,7 @@ public class RezervareManagementService {
         this.repoRezervare = repoRezervare;
     }
 
-    public Agentie getUserCurent() {
+    private Agentie getUserCurent() {
         return userCurent;
     }
 
@@ -26,10 +26,10 @@ public class RezervareManagementService {
     public void rezerva(Excursie excursie, String numeClient, String telefon, Integer nrBilete) throws Exception {
         if (excursie.getLocuriDisponibile() >= nrBilete) {
             String id = String.valueOf(excursie.hashCode() + numeClient.hashCode() + nrBilete.hashCode());
-            Rezervare rez = new Rezervare(id, getUserCurent(), excursie, numeClient, telefon, nrBilete);
-            repoRezervare.save(rez);
             excursie.setLocuriDisponibile(excursie.getLocuriDisponibile() - nrBilete);
             repoExcursie.update(excursie.getId(), excursie);
+            Rezervare rez = new Rezervare(id, getUserCurent(), excursie, numeClient, telefon, nrBilete);
+            repoRezervare.save(rez);
         } else
             throw new Exception("Locuri insuficiente!");
     }

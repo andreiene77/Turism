@@ -1,10 +1,22 @@
 package model;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import java.io.Serializable;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Objects;
 
-public class Agentie implements IHasID<String> {
+@Entity
+@Table(name = "Agentii")
+public class Agentie implements IHasID<String>, Serializable {
+    @Id
+    @Column(name = "usrname")
     private String username;
+
+    @Column(name = "pswd")
     private String password;
 
     public Agentie(String username, String password) {
@@ -13,8 +25,13 @@ public class Agentie implements IHasID<String> {
     }
 
     public Agentie(ResultSet result) throws SQLException {
-        this.username = result.getString("usrname");
-        this.password = result.getString("pswd");
+        username = result.getString("usrname");
+        password = result.getString("pswd");
+    }
+
+    public Agentie() {
+        username = "";
+        password = "";
     }
 
     @Override
@@ -32,5 +49,18 @@ public class Agentie implements IHasID<String> {
                 "username='" + username + '\'' +
                 ", password='" + password + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Agentie agentie = (Agentie) o;
+        return username.equals(agentie.username);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username);
     }
 }

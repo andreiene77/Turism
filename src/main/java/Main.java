@@ -1,26 +1,15 @@
+import client.Client;
+import controller.LoginController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import network.Logger;
 
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.Properties;
 
 public class Main extends Application {
     public static void main(String[] args) {
-        Properties serverProps = new Properties();
-        try {
-            serverProps.load(new FileReader("bd.config"));
-            //System.setProperties(serverProps);
-
-            System.out.println("Properties set. ");
-            //System.getProperties().list(System.out);
-            serverProps.list(System.out);
-        } catch (IOException e) {
-            System.out.println("Cannot find bd.config " + e);
-        }
-
         launch(args);
     }
 
@@ -40,5 +29,11 @@ public class Main extends Application {
         loader.setLocation(getClass().getResource("/view/Login.fxml"));
         primaryStage.setScene(new Scene(loader.load()));
         primaryStage.show();
+        LoginController controller = loader.getController();
+        Client client = new Client("localhost", 55555);
+        Logger logger = new Logger();
+        client.addClientListener(logger);
+        controller.setClient(client);
+        controller.startClient();
     }
 }

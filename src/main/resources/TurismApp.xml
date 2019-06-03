@@ -3,24 +3,20 @@
        xmlns:util="http://www.springframework.org/schema/util" xmlns="http://www.springframework.org/schema/beans"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
-    <util:properties id="jdbcProps">
-        <prop key="turism.jdbc.driver">org.sqlite.JDBC</prop>
-        <prop key="turism.jdbc.url">jdbc:sqlite:TurismDB.sqlite</prop>
-    </util:properties>
+    <!--    <util:properties id="jdbcProps">-->
+    <!--        <prop key="turism.jdbc.driver">org.sqlite.JDBC</prop>-->
+    <!--        <prop key="turism.jdbc.url">jdbc:sqlite:TurismDB.sqlite</prop>-->
+    <!--    </util:properties>-->
 
     <util:properties id="jdbcProps_Config" location="classpath:bd.config"/>
 
-    <bean id="repo_ag" class="repository.RepoAgentieJDBC">
-        <constructor-arg ref="jdbcProps"/>
-    </bean>
+    <util:properties id="serverProps_Config" location="classpath:server.config"/>
 
-    <bean id="repo_ex" class="repository.RepoExcursieJDBC">
-        <constructor-arg ref="jdbcProps"/>
-    </bean>
+    <bean id="repo_ag" class="repository.RepoAgentieJDBC"/>
 
-    <bean id="repo_rez" class="repository.RepoRezervareJDBC">
-        <constructor-arg ref="jdbcProps"/>
-    </bean>
+    <bean id="repo_ex" class="repository.RepoExcursieJDBC"/>
+
+    <bean id="repo_rez" class="repository.RepoRezervareJDBC"/>
 
     <bean id="login_service" class="service.LoginService">
         <constructor-arg ref="repo_ag"/>
